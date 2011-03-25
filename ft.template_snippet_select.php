@@ -243,6 +243,8 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         }
         elseif(is_array($settings))
         {
+            $template_options = array();
+            
             foreach($templates->result_array() as $row)
             {
                 // Depending on which settings show the appropriate templates
@@ -293,6 +295,8 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         }
         elseif(is_array($settings))
         {
+            $snippet_options = array();
+            
             foreach($snippets->result_array() as $row)
             {
                 if(is_array($settings['snippets']) AND in_array($row['snippet_id'], $settings['snippets']) OR $settings['show_all'] == 'y')
@@ -375,6 +379,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $sql = "SELECT *
                     FROM exp_snippets
                     WHERE site_id = '".$site_id."' 
+                    OR site_id = '0'
                     ORDER BY snippet_name";
 
             $this->cache['snippets'] = $this->EE->db->query($sql);
@@ -432,7 +437,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         // All the stuff for Templates
         $settings = (!isset($settings['template_snippet_select']) OR $settings['template_snippet_select'] == '') ? array() : $settings['template_snippet_select'];
 
-        $template_checkbox_options = '<p>'. form_checkbox('field_show_all_templates', 'y', (isset($settings['field_templates']['show_all']) AND $settings['field_templates']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_templates"') . ' <label for="show_all_templates">Show all</label></p>';
+        $template_checkbox_options = '<p>'. form_checkbox('field_show_all_templates', 'y', (isset($settings['field_templates']['show_all']) AND $settings['field_templates']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_templates" class="show_all_templates"') . ' <label for="show_all_templates">Show all</label></p>';
 
         $groups = array();
         foreach($templates->result_array() as $template)
@@ -444,11 +449,11 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $groups[] = $template['group_name'];
         }
         
-        $template_checkbox_options .= '<p>'. form_checkbox('field_show_selected_templates', 'y', (isset($settings['field_templates']['show_selected']) AND $settings['field_templates']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_templates"') . ' <label for="show_selected_templates">Show only specific templates</label></p>';
+        $template_checkbox_options .= '<p>'. form_checkbox('field_show_selected_templates', 'y', (isset($settings['field_templates']['show_selected']) AND $settings['field_templates']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_templates" class="show_selected_templates"') . ' <label for="show_selected_templates">Show only specific templates</label></p>';
         
         // All the stuff for Snippets
-        $snippet_checkbox_options = '<p>'. form_checkbox('field_show_all_snippets', 'y', (isset($settings['field_snippets']['show_all']) AND $settings['field_snippets']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_snippets"') . ' <label for="show_all_snippets">Show all</label></p>';
-        $snippet_checkbox_options .= '<p>'. form_checkbox('field_show_selected_snippets', 'y', (isset($settings['field_snippets']['show_selected']) AND $settings['field_snippets']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_snippets"') . ' <label for="show_selected_snippets">Show only specific snippets</label></p>';
+        $snippet_checkbox_options = '<p>'. form_checkbox('field_show_all_snippets', 'y', (isset($settings['field_snippets']['show_all']) AND $settings['field_snippets']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_snippets" class="show_all_snippets"') . ' <label for="show_all_snippets">Show all</label></p>';
+        $snippet_checkbox_options .= '<p>'. form_checkbox('field_show_selected_snippets', 'y', (isset($settings['field_snippets']['show_selected']) AND $settings['field_snippets']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_snippets" class="show_selected_snippets"') . ' <label for="show_selected_snippets">Show only specific snippets</label></p>';
         
         if($snippets->num_rows() == 0)
         {
@@ -481,62 +486,62 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         {
             $script = '
                 function show_all_templates(on_load){
-                    if($("#show_all_templates").is(":checked")){
-                        $(".show_group_templates, #show_selected_templates").attr("checked", false).attr("disabled", true);
+                    if($(".show_all_templates").is(":checked")){
+                        $(".show_group_templates, .show_selected_templates").attr("checked", false).attr("disabled", true);
                     } else if(!on_load) {
-                        $(".show_group_templates, #show_selected_templates").attr("disabled", false);
+                        $(".show_group_templates, .show_selected_templates").attr("disabled", false);
                     }
                 }
                 function show_group_templates(on_load){
                     if($("input[name*=\'field_show_group\']").is(":checked")){
-                        $("#show_all_templates, #show_selected_templates").attr("checked", false).attr("disabled", true);
+                        $(".show_all_templates, .show_selected_templates").attr("checked", false).attr("disabled", true);
                     } else if(!on_load) {
-                        $("#show_all_templates, #show_selected_templates").attr("disabled", false);
+                        $(".show_all_templates, .show_selected_templates").attr("disabled", false);
                     }
                 }
                 function show_selected_templates(on_load){
-                    if($("#show_selected_templates").is(":checked")){
-                        $(".show_group_templates, #show_all_templates").attr("checked", false).attr("disabled", true);
+                    if($(".show_selected_templates").is(":checked")){
+                        $(".show_group_templates, .show_all_templates").attr("checked", false).attr("disabled", true);
                         $(".field_template_select").show();
                     } else if(!on_load) {
-                        $(".show_group_templates, #show_all_templates").attr("disabled", false);
+                        $(".show_group_templates, .show_all_templates").attr("disabled", false);
                         $(".field_template_select").hide();
                         $(".field_template_select option").attr("selected", false);
                     }
                 }
                 
                 function show_all_snippets(on_load){
-                    if($("#show_all_snippets").is(":checked")){
-                        $(".show_group_snippets, #show_selected_snippets").attr("checked", false).attr("disabled", true);
+                    if($(".show_all_snippets").is(":checked")){
+                        $(".show_group_snippets, .show_selected_snippets").attr("checked", false).attr("disabled", true);
                     } else if(!on_load) {
-                        $(".show_group_snippets, #show_selected_snippets").attr("disabled", false);
+                        $(".show_group_snippets, .show_selected_snippets").attr("disabled", false);
                     }
                 }
                 function show_selected_snippets(on_load){
-                    if($("#show_selected_snippets").is(":checked")){
-                        $("#show_all_snippets").attr("checked", false).attr("disabled", true);
+                    if($(".show_selected_snippets").is(":checked")){
+                        $(".show_all_snippets").attr("checked", false).attr("disabled", true);
                         $(".field_snippet_select").show();
                     } else if(!on_load) {
-                        $("#show_all_snippets").attr("disabled", false);
+                        $(".show_all_snippets").attr("disabled", false);
                         $(".field_snippet_select").hide();
                         $(".field_snippet_select option").attr("selected", false);
                     }
                 }
                 
-                $("#show_all_templates").live("click", function(){
+                $(".show_all_templates").live("click", function(){
                     show_all_templates(false);
                 });
                 $(".show_group_templates").live("click", function(){
                     show_group_templates(false);
                 });
-                $("#show_selected_templates").live("click", function(){
+                $(".show_selected_templates").live("click", function(){
                     show_selected_templates(false);
                 });
                 
-                $("#show_all_snippets").live("click", function(){
+                $(".show_all_snippets").live("click", function(){
                     show_all_snippets(false);
                 });
-                $("#show_selected_snippets").live("click", function(){
+                $(".show_selected_snippets").live("click", function(){
                     show_selected_snippets(false);
                 });
                 
