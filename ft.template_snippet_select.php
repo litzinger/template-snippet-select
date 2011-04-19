@@ -265,11 +265,11 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 }
             }
             
-            $return = $template_options;
+            $return = count($template_options) > 0 ? $template_options : array(lang('template_not_defined'));
         }
         else
         {
-            $return = lang('template_not_defined');
+            $return = array(lang('template_not_defined'));
         }
         
         return $return;
@@ -305,11 +305,11 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 }
             }
             
-            $return = $snippet_options;
+            $return = count($snippet_options) > 0 ? $snippet_options : array(lang('snippet_not_defined'));
         }
         else
         {
-            $return = lang('snippet_not_defined');
+            $return = array(lang('snippet_not_defined'));
         }
 
         return $return;
