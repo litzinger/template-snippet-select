@@ -111,7 +111,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 'field_snippets' => array(
                     'show_all' => isset($settings['field_show_all_snippets']) ? $settings['field_show_all_snippets'] : false,
                     'show_selected' => isset($settings['field_show_selected_snippets']) ? $settings['field_show_selected_snippets'] : false,
-                    'snippets' => isset($settings['field_template_select']) ? $settings['field_template_select'] : false
+                    'snippets' => isset($settings['field_snippet_select']) ? $settings['field_snippet_select'] : false
                 )
             )
         );
@@ -184,7 +184,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         // If it's numeric, then we have a Snippet ID, otherwise we have a template
         if(is_numeric($data) and $data)
         {
-            return $this->_get_snippet($data);
+            return $this->EE->config->_global_vars[$this->_get_snippet($data)];
         }
         elseif($data)
         {
@@ -361,12 +361,12 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     
     private function _get_snippet($snippet_id)
     {
-        $this->EE->db->select('snippet_contents');
+        $this->EE->db->select('snippet_name');
         $this->EE->db->where('snippet_id', $snippet_id);
         $this->EE->db->from('snippets');
         $query = $this->EE->db->get();
         
-        return $query->row('snippet_contents');
+        return $query->row('snippet_name');
     }
     
     private function _get_snippets()
