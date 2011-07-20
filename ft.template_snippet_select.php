@@ -265,7 +265,8 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 }
             }
             
-            $return = count($template_options) > 0 ? $template_options : array(lang('template_not_defined'));
+            // $return = count($template_options) > 0 ? $template_options : array(lang('template_not_defined'));
+            $return = count($template_options) > 0 ? $template_options : ''; 
         }
         else
         {
@@ -305,7 +306,8 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 }
             }
             
-            $return = count($snippet_options) > 0 ? $snippet_options : array(lang('snippet_not_defined'));
+            // $return = count($snippet_options) > 0 ? $snippet_options : array(lang('snippet_not_defined'));
+            $return = count($snippet_options) > 0 ? $snippet_options : ''; 
         }
         else
         {
