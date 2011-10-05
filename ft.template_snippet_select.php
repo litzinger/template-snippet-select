@@ -78,18 +78,20 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      */
     function save_settings($data)
     {
+        $post = $this->EE->input->post('tss');
+        
         return array(
             'template_snippet_select' => array(
                 'field_templates' => array(
-                    'show_all' => $this->EE->input->post('field_show_all_templates'),
-                    'show_group' => $this->EE->input->post('field_show_group_templates'),
-                    'show_selected' => $this->EE->input->post('field_show_selected_templates'),
-                    'templates' => $this->EE->input->post('field_template_select')
+                    'show_all' => (isset($post['field_show_all_templates']) ? $post['field_show_all_templates'] : false),
+                    'show_group' => (isset($post['field_show_group_templates']) ? $post['field_show_group_templates'] : false),
+                    'show_selected' => (isset($post['field_show_selected_templates']) ? $post['field_show_selected_templates'] : false),
+                    'templates' => (isset($post['field_template_select']) ? $post['field_template_select'] : false)
                 ),
                 'field_snippets' => array(
-                    'show_all' => $this->EE->input->post('field_show_all_snippets'),
-                    'show_selected' => $this->EE->input->post('field_show_selected_snippets'),
-                    'snippets' => $this->EE->input->post('field_snippet_select')
+                    'show_all' => (isset($post['field_show_all_snippets']) ? $post['field_show_all_snippets'] : false),
+                    'show_selected' => (isset($post['field_show_selected_snippets']) ? $post['field_show_selected_snippets'] : false),
+                    'snippets' => (isset($post['field_snippet_select']) ? $post['field_snippet_select'] : false)
                 )
             )
         );
@@ -100,6 +102,8 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      */
     function save_cell_settings($settings)
     {
+        $settings = $settings['tss'];
+        
         return array(
             'template_snippet_select' => array(
                 'field_templates' => array(
@@ -439,23 +443,23 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         // All the stuff for Templates
         $settings = (!isset($settings['template_snippet_select']) OR $settings['template_snippet_select'] == '') ? array() : $settings['template_snippet_select'];
 
-        $template_checkbox_options = '<p>'. form_checkbox('field_show_all_templates', 'y', (isset($settings['field_templates']['show_all']) AND $settings['field_templates']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_templates" class="show_all_templates"') . ' <label for="show_all_templates">Show all</label></p>';
+        $template_checkbox_options = '<p>'. form_checkbox('tss[field_show_all_templates]', 'y', (isset($settings['field_templates']['show_all']) AND $settings['field_templates']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_templates" class="show_all_templates"') . ' <label for="show_all_templates">Show all</label></p>';
 
         $groups = array();
         foreach($templates->result_array() as $template)
         {
             if(!in_array($template['group_name'], $groups))
             {
-                $template_checkbox_options .= '<p>'. form_checkbox('field_show_group_templates[]', $template['group_name'], (isset($template['group_name']) AND isset($settings['field_templates']['show_group']) AND is_array($settings['field_templates']['show_group']) AND in_array($template['group_name'], $settings['field_templates']['show_group'])) ? TRUE : FALSE, 'class="show_group_templates" id="show_'. $template['group_name'] .'"') . ' <label for="show_'. $template['group_name'] .'">Show all <i>'. $template['group_name'] .'</i> templates</label></p>';
+                $template_checkbox_options .= '<p>'. form_checkbox('tss[field_show_group_templates][]', $template['group_name'], (isset($template['group_name']) AND isset($settings['field_templates']['show_group']) AND is_array($settings['field_templates']['show_group']) AND in_array($template['group_name'], $settings['field_templates']['show_group'])) ? TRUE : FALSE, 'class="show_group_templates" id="show_'. $template['group_name'] .'"') . ' <label for="show_'. $template['group_name'] .'">Show all <i>'. $template['group_name'] .'</i> templates</label></p>';
             }
             $groups[] = $template['group_name'];
         }
         
-        $template_checkbox_options .= '<p>'. form_checkbox('field_show_selected_templates', 'y', (isset($settings['field_templates']['show_selected']) AND $settings['field_templates']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_templates" class="show_selected_templates"') . ' <label for="show_selected_templates">Show only specific templates</label></p>';
+        $template_checkbox_options .= '<p>'. form_checkbox('tss[field_show_selected_templates]', 'y', (isset($settings['field_templates']['show_selected']) AND $settings['field_templates']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_templates" class="show_selected_templates"') . ' <label for="show_selected_templates">Show only specific templates</label></p>';
         
         // All the stuff for Snippets
-        $snippet_checkbox_options = '<p>'. form_checkbox('field_show_all_snippets', 'y', (isset($settings['field_snippets']['show_all']) AND $settings['field_snippets']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_snippets" class="show_all_snippets"') . ' <label for="show_all_snippets">Show all</label></p>';
-        $snippet_checkbox_options .= '<p>'. form_checkbox('field_show_selected_snippets', 'y', (isset($settings['field_snippets']['show_selected']) AND $settings['field_snippets']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_snippets" class="show_selected_snippets"') . ' <label for="show_selected_snippets">Show only specific snippets</label></p>';
+        $snippet_checkbox_options = '<p>'. form_checkbox('tss[field_show_all_snippets]', 'y', (isset($settings['field_snippets']['show_all']) AND $settings['field_snippets']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_snippets" class="show_all_snippets"') . ' <label for="show_all_snippets">Show all</label></p>';
+        $snippet_checkbox_options .= '<p>'. form_checkbox('tss[field_show_selected_snippets]', 'y', (isset($settings['field_snippets']['show_selected']) AND $settings['field_snippets']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_snippets" class="show_selected_snippets"') . ' <label for="show_selected_snippets">Show only specific snippets</label></p>';
         
         if($snippets->num_rows() == 0)
         {
@@ -463,7 +467,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         }
         else
         {
-            $snippet_options = form_multiselect('field_snippet_select[]', $this->_create_snippet_options($snippets, true), isset($settings['field_snippets']['snippets']) ? $settings['field_snippets']['snippets'] : array(), 'class="field_snippet_select" size="10" style="display: none;"');
+            $snippet_options = form_multiselect('tss[field_snippet_select][]', $this->_create_snippet_options($snippets, true), isset($settings['field_snippets']['snippets']) ? $settings['field_snippets']['snippets'] : array(), 'class="field_snippet_select" size="10" style="display: none;"');
         }
         
         $this->_load_js();
@@ -472,7 +476,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             array(
                 '<strong>'. lang('template_setting_title') .'</strong>',
                 $template_checkbox_options .
-                form_multiselect('field_template_select[]', $this->_create_template_options($templates, true), isset($settings['field_templates']['templates']) ? $settings['field_templates']['templates'] : array(), 'size="10" class="field_template_select" style="display: none;"')
+                form_multiselect('tss[field_template_select][]', $this->_create_template_options($templates, true), isset($settings['field_templates']['templates']) ? $settings['field_templates']['templates'] : array(), 'size="10" class="field_template_select" style="display: none;"')
             ),
             array(
                 '<strong>'. lang('snippet_setting_title') .'</strong>',
@@ -561,10 +565,12 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $this->cache['js_added'] = true;
     }
     
-    private function debug($str)
+    private function debug($str, $die = false)
     {
         echo '<pre>';
         var_dump($str);
         echo '</pre>';
+        
+        if($die) die;
     }
 }
