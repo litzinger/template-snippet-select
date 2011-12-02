@@ -186,9 +186,9 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     function replace_tag($data, $params = '', $tagdata = '')
     {
         // If it's numeric, then we have a Snippet ID, otherwise we have a template
-        if(is_numeric($data) and $data)
+        if(is_numeric($data) and $data and ($snippet = isset($this->EE->config->_global_vars[$this->_get_snippet($data)])))
         {
-            return $this->EE->config->_global_vars[$this->_get_snippet($data)];
+            return $snippet;
         }
         elseif($data)
         {
