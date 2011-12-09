@@ -186,9 +186,9 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     function replace_tag($data, $params = '', $tagdata = '')
     {
         // If it's numeric, then we have a Snippet ID, otherwise we have a template
-        if(is_numeric($data) and $data and ($snippet = isset($this->EE->config->_global_vars[$this->_get_snippet($data)])))
+        if(is_numeric($data) and $data and isset($this->EE->config->_global_vars[$this->_get_snippet($data)]))
         {
-            return $snippet;
+            return $this->EE->config->_global_vars[$this->_get_snippet($data)];
         }
         elseif($data)
         {
@@ -367,12 +367,17 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     
     private function _get_snippet($snippet_id)
     {
-        $this->EE->db->select('snippet_name');
-        $this->EE->db->where('snippet_id', $snippet_id);
-        $this->EE->db->from('snippets');
-        $query = $this->EE->db->get();
+        if(!isset($this->cache['snippet_'. $snippet_id]))
+        {
+            $this->EE->db->select('snippet_name');
+            $this->EE->db->where('snippet_id', $snippet_id);
+            $this->EE->db->from('snippets');
+            $query = $this->EE->db->get();
         
-        return $query->row('snippet_name');
+            $this->cache['snippet_'. $snippet_id] = $query->row('snippet_name');
+        }
+        
+        return $this->cache['snippet_'. $snippet_id];
     }
     
     private function _get_snippets()
