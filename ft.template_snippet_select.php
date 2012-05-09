@@ -102,7 +102,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      */
     function save_cell_settings($settings)
     {
-        $settings = $settings['tss'];
+        $settings = isset($settings['tss']) ? $settings['tss'] : array();
         
         return array(
             'template_snippet_select' => array(
