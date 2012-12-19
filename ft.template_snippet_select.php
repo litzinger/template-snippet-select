@@ -138,8 +138,17 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         
         $templates = $this->_templates_select($data, $this->field_name, $this->field_id);
         $snippets  = $this->_snippets_select($data, $this->field_name, $this->field_id);
+
+        $templates = $templates ? array('Templates' => $templates) : array();
+        $snippets = $snippets ? array('Snippets' => $snippets) : array();
+
+        $options = array_merge(
+            array(lang('none')),
+            $templates,
+            $snippets
+        );
         
-        $return = form_dropdown($this->field_name, array(lang('none'), 'Templates' => $templates, 'Snippets' => $snippets), $data, 'id="'. $this->field_name .'"');
+        $return = form_dropdown($this->field_name, $options, $data, 'id="'. $this->field_name .'"');
         
         // If the current user is an Admin, give them a link to edit the templates that appear
         if($this->EE->session->userdata['group_id'] == 1 AND $group_id)
@@ -159,9 +168,18 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         
         $templates = $this->_templates_select($data, $this->cell_name, $this->field_id);
         $snippets  = $this->_snippets_select($data, $this->cell_name, $this->field_id);
+
+        $templates = $templates ? array('Templates' => $templates) : array();
+        $snippets = $snippets ? array('Snippets' => $snippets) : array();
+
+        $options = array_merge(
+            array(lang('none')),
+            $templates,
+            $snippets
+        );
         
         $return['class'] = 'template-select-matrix';
-        $return['data'] = form_dropdown($this->cell_name, array(lang('none'), 'Templates' => $templates, 'Snippets' => $snippets), $data, 'id="'. $this->cell_name .'"');
+        $return['data'] = form_dropdown($this->cell_name, $options, $data, 'id="'. $this->cell_name .'"');
         
         // If the current user is an Admin, give them a link to edit the templates that appear
         if($this->EE->session->userdata['group_id'] == 1 AND $group_id)
@@ -262,15 +280,14 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                     $file = $row['group_name'] .'/'. $row['template_name'];
                     $template_options[$file] = $file;
                 }
-                elseif(isset($settings['show_selected']) AND $settings['show_selected'] == 'y' AND in_array($row['template_id'], $settings['templates']))
+                elseif( ! empty($settings['templates']) AND isset($settings['show_selected']) AND $settings['show_selected'] == 'y' AND in_array($row['template_id'], $settings['templates']))
                 {
                     $file = $row['group_name'] .'/'. $row['template_name'];
                     $template_options[$file] = $file;
                 }
             }
             
-            // $return = count($template_options) > 0 ? $template_options : array(lang('template_not_defined'));
-            $return = count($template_options) > 0 ? $template_options : ''; 
+            $return = count($template_options) > 0 ? $template_options : FALSE; 
         }
         else
         {
@@ -304,14 +321,13 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             
             foreach($snippets->result_array() as $row)
             {
-                if(is_array($settings['snippets']) AND in_array($row['snippet_id'], $settings['snippets']) OR $settings['show_all'] == 'y')
+                if(is_array($settings['snippets']) AND ! empty($settings['snippets']) AND in_array($row['snippet_id'], $settings['snippets']) OR $settings['show_all'] == 'y')
                 {
                     $snippet_options[$row['snippet_id']] = $row['snippet_name'];
                 }
             }
             
-            // $return = count($snippet_options) > 0 ? $snippet_options : array(lang('snippet_not_defined'));
-            $return = count($snippet_options) > 0 ? $snippet_options : ''; 
+            $return = count($snippet_options) > 0 ? $snippet_options : FALSE; 
         }
         else
         {
