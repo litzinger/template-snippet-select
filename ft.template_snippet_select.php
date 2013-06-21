@@ -32,9 +32,9 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         'version'   => TEMPLATE_SNIPPET_SELECT_VERSION
     );
   
-    function Template_snippet_select_ft()
+    function __construct()
     {
-        parent::EE_Fieldtype();
+        parent::__construct();
         
         // Create cache
         if (! isset($this->EE->session->cache[__CLASS__]))
@@ -213,12 +213,21 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             if($params AND isset($params['embed']) AND $params['embed'] == 'y')
             {
                 $p = array();
+                $site = '';
+
                 foreach($params as $param => $value)
                 {
-                    $p[] = $param .'="'. $value .'"';
+                    if ($param == 'site' AND $value != '')
+                    {
+                        $site = $value.':';
+                    }
+                    else
+                    {
+                        $p[] = $param .'="'. $value .'"';
+                    }
                 }
-                
-                return '{embed="'. $data .'" '. implode(" ", $p) .'}';
+
+                return '{embed="'. $site.$data .'" '. implode(" ", $p) .'}';
             }
             elseif(isset($params['embed']) AND $params['embed'] == 'y')
             {
