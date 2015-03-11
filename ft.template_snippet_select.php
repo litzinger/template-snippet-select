@@ -19,23 +19,23 @@ if (! defined('TEMPLATE_SNIPPET_SELECT_VERSION'))
  * @copyright   Copyright 2010 - Brian Litzinger
  * @link        http://boldminded.com
  */
- 
+
 class Template_snippet_select_ft extends EE_Fieldtype {
-   
+
     var $cache;
     var $has_array_data = TRUE;
     var $settings_exist = 'y';
     var $settings = array();
-    
+
     var $info = array(
         'name'      => TEMPLATE_SNIPPET_SELECT_NAME,
         'version'   => TEMPLATE_SNIPPET_SELECT_VERSION
     );
-  
+
     function __construct()
     {
         parent::__construct();
-        
+
         // Create cache
         if (! isset($this->EE->session->cache[__CLASS__]))
         {
@@ -43,7 +43,12 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         }
         $this->cache =& $this->EE->session->cache[__CLASS__];
     }
-  
+
+	public function accepts_content_type($name)
+	{
+		return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
+	}
+
     /**
      * Normal Fieldtype settings
      */
@@ -56,7 +61,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $this->EE->table->add_row($row[0], $row[1]);
         }
     }
-    
+
     /**
      * Display Matrix Cell Settings
      */
@@ -64,7 +69,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
         return $this->_get_field_settings($data);
     }
-    
+
     /**
      * Display Low Variables Settings
      */
@@ -73,37 +78,58 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         return $this->display_cell_settings($data);
     }
 
+	 /**q
+     * Display Grid Settings
+     */
+	public function grid_display_settings($data)
+	{
+		$rows = $this->_get_field_settings($data);
+
+		foreach ($rows as &$row)
+		{
+			$row = EE_Fieldtype::grid_settings_row($row[0], $row[1]);
+		}
+		return $rows;
+	}
+
     /**
      * Save Normal Fieldtype settings
      */
     function save_settings($data)
     {
-        $post = $this->EE->input->post('tss');
-        
-        return array(
+		if (empty($data['tss']))
+		{
+			$settings = $this->EE->input->post('tss');
+		}
+		else
+		{
+			$settings = $data['tss'];
+		}
+
+		return array(
             'template_snippet_select' => array(
                 'field_templates' => array(
-                    'show_all' => (isset($post['field_show_all_templates']) ? $post['field_show_all_templates'] : false),
-                    'show_group' => (isset($post['field_show_group_templates']) ? $post['field_show_group_templates'] : false),
-                    'show_selected' => (isset($post['field_show_selected_templates']) ? $post['field_show_selected_templates'] : false),
-                    'templates' => (isset($post['field_template_select']) ? $post['field_template_select'] : false)
+                    'show_all' => isset($settings['field_show_all_templates']) ? $settings['field_show_all_templates'] : false,
+                    'show_group' => isset($settings['field_show_group_templates']) ? $settings['field_show_group_templates'] : false,
+                    'show_selected' => isset($settings['field_show_selected_templates']) ? $settings['field_show_selected_templates'] : false,
+                    'templates' => isset($settings['field_template_select']) ? $settings['field_template_select'] : false
                 ),
                 'field_snippets' => array(
-                    'show_all' => (isset($post['field_show_all_snippets']) ? $post['field_show_all_snippets'] : false),
-                    'show_selected' => (isset($post['field_show_selected_snippets']) ? $post['field_show_selected_snippets'] : false),
-                    'snippets' => (isset($post['field_snippet_select']) ? $post['field_snippet_select'] : false)
+                    'show_all' => isset($settings['field_show_all_snippets']) ? $settings['field_show_all_snippets'] : false,
+                    'show_selected' => isset($settings['field_show_selected_snippets']) ? $settings['field_show_selected_snippets'] : false,
+                    'snippets' => isset($settings['field_snippet_select']) ? $settings['field_snippet_select'] : false
                 )
             )
         );
     }
-    
+
     /**
      * Save Matrix Cell Settings
      */
     function save_cell_settings($settings)
     {
         $settings = isset($settings['tss']) ? $settings['tss'] : array();
-        
+
         return array(
             'template_snippet_select' => array(
                 'field_templates' => array(
@@ -120,7 +146,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             )
         );
     }
-    
+
     /**
      * Save Low Variables Settings
      */
@@ -128,14 +154,22 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
         return $this->save_settings($settings);
     }
-    
+
+	/**
+     * Save Grid Cell Settings
+     */
+    function grid_validate_settings($settings)
+    {
+        return TRUE;
+    }
+
     /**
      * Normal Fieldtype Display
      */
     function display_field($data)
     {
         $group_id = $this->_get_group_id($this->field_id);
-        
+
         $templates = $this->_templates_select($data, $this->field_name, $this->field_id);
         $snippets  = $this->_snippets_select($data, $this->field_name, $this->field_id);
 
@@ -147,15 +181,15 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $templates,
             $snippets
         );
-        
+
         $return = form_dropdown($this->field_name, $options, $data, 'id="'. $this->field_name .'"');
-        
+
         // If the current user is an Admin, give them a link to edit the templates that appear
         if($this->EE->session->userdata['group_id'] == 1 AND $group_id)
         {
             $return .= '<br /><small style="display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);"><a href="'. BASE.AMP.'C=admin_content'.AMP.'M=field_edit'.AMP.'field_id='.$this->field_id.AMP.'group_id='.$group_id .'">Edit Available Templates & Snippets</a></small>';
         }
-        
+
         return $return;
     }
 
@@ -165,7 +199,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     function display_cell($data)
     {
         $group_id = $this->_get_group_id($this->field_id);
-        
+
         $templates = $this->_templates_select($data, $this->cell_name, $this->field_id);
         $snippets  = $this->_snippets_select($data, $this->cell_name, $this->field_id);
 
@@ -177,19 +211,19 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $templates,
             $snippets
         );
-        
+
         $return['class'] = 'template-select-matrix';
         $return['data'] = form_dropdown($this->cell_name, $options, $data, 'id="'. $this->cell_name .'"');
-        
+
         // If the current user is an Admin, give them a link to edit the templates that appear
         if($this->EE->session->userdata['group_id'] == 1 AND $group_id)
         {
             $return['data'] .= '<br /><small style="display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);"><a href="'. BASE.AMP.'C=admin_content'.AMP.'M=field_edit'.AMP.'field_id='.$this->field_id.AMP.'group_id='.$group_id .'">Edit Available Templates & Snippets</a></small>';
         }
-        
+
         return $return;
     }
-    
+
     /**
      * Low Variables Fieldtype Display
      */
@@ -197,7 +231,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
         return $this->display_field($data);
     }
-    
+
     /**
      * Print the embed tag, with parameters if defined
      */
@@ -243,7 +277,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             return '';
         }
     }
-    
+
     /**
      * Low Variables replace tag
      */
@@ -251,9 +285,9 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
         $this->replace_tag($data, $params, $tagdata);
     }
-    
 
-    
+
+
     /**
     * Template Groups Multi-select
     *
@@ -264,6 +298,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
         $this->EE->lang->loadfile('template_snippet_select');
         $settings = $this->_get_settings();
+
         $settings = $settings['field_templates'];
         $templates = $this->_get_templates();
 
@@ -275,7 +310,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         elseif(is_array($settings))
         {
             $template_options = array();
-            
+
             foreach($templates->result_array() as $row)
             {
                 // Depending on which settings show the appropriate templates
@@ -295,17 +330,17 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                     $template_options[$file] = $file;
                 }
             }
-            
-            $return = count($template_options) > 0 ? $template_options : FALSE; 
+
+            $return = count($template_options) > 0 ? $template_options : FALSE;
         }
         else
         {
             $return = array(lang('template_not_defined'));
         }
-        
+
         return $return;
     }
-    
+
     /**
     * Snippets Multi-select
     *
@@ -318,7 +353,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $settings = $this->_get_settings();
         $settings = $settings['field_snippets'];
         $snippets = $this->_get_snippets();
-        
+
         // Get the snippets (if they exist)
         if($snippets->num_rows() == 0)
         {
@@ -327,7 +362,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         elseif(is_array($settings))
         {
             $snippet_options = array();
-            
+
             foreach($snippets->result_array() as $row)
             {
                 if(is_array($settings['snippets']) AND ! empty($settings['snippets']) AND in_array($row['snippet_id'], $settings['snippets']) OR $settings['show_all'] == 'y')
@@ -335,8 +370,8 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                     $snippet_options[$row['snippet_id']] = $row['snippet_name'];
                 }
             }
-            
-            $return = count($snippet_options) > 0 ? $snippet_options : FALSE; 
+
+            $return = count($snippet_options) > 0 ? $snippet_options : FALSE;
         }
         else
         {
@@ -345,32 +380,32 @@ class Template_snippet_select_ft extends EE_Fieldtype {
 
         return $return;
     }
-    
+
     private function _create_template_options($templates, $multi_select = false)
     {
         $options = array();
 
-        foreach($templates->result_array() as $row) 
+        foreach($templates->result_array() as $row)
         {
             $file = $row['group_name'] .'/'. $row['template_name'];
             $options[$row['template_id']] = $file;
         }
-        
+
         return $options;
     }
-    
+
     private function _create_snippet_options($snippets, $multi_select = false)
     {
         $options = array();
-        
+
         foreach($snippets->result_array() as $row)
         {
             $options[$row['snippet_id']] = $row['snippet_name'];
         }
-        
+
         return $options;
     }
-    
+
     private function _get_templates()
     {
         if(!isset($this->cache['templates']))
@@ -381,15 +416,15 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $sql = "SELECT tg.group_name, t.template_name, t.template_id
                     FROM exp_template_groups tg, exp_templates t
                     WHERE tg.group_id = t.group_id
-                    AND tg.site_id = '".$site_id."' 
+                    AND tg.site_id = '".$site_id."'
                     ORDER BY tg.group_name, t.template_name";
 
             $this->cache['templates'] = $this->EE->db->query($sql);
         }
-        
+
         return $this->cache['templates'];
     }
-    
+
     private function _get_snippet($snippet_id)
     {
         if(!isset($this->cache['snippet_'. $snippet_id]))
@@ -398,13 +433,13 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             $this->EE->db->where('snippet_id', $snippet_id);
             $this->EE->db->from('snippets');
             $query = $this->EE->db->get();
-        
+
             $this->cache['snippet_'. $snippet_id] = $query->row('snippet_name');
         }
-        
+
         return $this->cache['snippet_'. $snippet_id];
     }
-    
+
     private function _get_snippets()
     {
         if(!isset($this->cache['snippets']))
@@ -414,20 +449,20 @@ class Template_snippet_select_ft extends EE_Fieldtype {
 
             $sql = "SELECT *
                     FROM exp_snippets
-                    WHERE site_id = '".$site_id."' 
+                    WHERE site_id = '".$site_id."'
                     OR site_id = '0'
                     ORDER BY snippet_name";
 
             $this->cache['snippets'] = $this->EE->db->query($sql);
         }
-        
+
         return $this->cache['snippets'];
     }
-    
+
     private function _get_settings()
     {
         // If it's a Matrix field
-        if(isset($this->settings['template_snippet_select']) AND is_array($this->settings['template_snippet_select'])) 
+        if(isset($this->settings['template_snippet_select']) AND is_array($this->settings['template_snippet_select']))
         {
             return $this->settings['template_snippet_select'];
         }
@@ -441,29 +476,29 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             return array();
         }
     }
-    
+
     private function _get_group_id($field_id = false)
     {
         // For Low Variables, $field_id isn't available, so degrade gracefully.
         if(!$field_id)
             return false;
-        
+
         if(!isset($this->cache['group_id'][$field_id]))
         {
             $this->EE->db->select('group_id');
             $this->EE->db->where('field_id', $field_id);
             $this->EE->db->from('channel_fields');
             $query = $this->EE->db->get();
-        
+
             foreach($query->result_array() as $row)
             {
                 $this->cache['group_id'][$field_id] = $row['group_id'];
             }
         }
-        
-        return $this->cache['group_id'][$field_id];
+
+        return isset($this->cache['group_id'][$field_id]) ? $this->cache['group_id'][$field_id] : '';
     }
-    
+
     private function _get_field_settings($settings)
     {
         $this->EE->lang->loadfile('template_snippet_select');
@@ -484,13 +519,13 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             }
             $groups[] = $template['group_name'];
         }
-        
+
         $template_checkbox_options .= '<p>'. form_checkbox('tss[field_show_selected_templates]', 'y', (isset($settings['field_templates']['show_selected']) AND $settings['field_templates']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_templates" class="show_selected_templates"') . ' <label for="show_selected_templates">Show only specific templates</label></p>';
-        
+
         // All the stuff for Snippets
         $snippet_checkbox_options = '<p>'. form_checkbox('tss[field_show_all_snippets]', 'y', (isset($settings['field_snippets']['show_all']) AND $settings['field_snippets']['show_all'] == 'y') ? TRUE : FALSE, 'id="show_all_snippets" class="show_all_snippets"') . ' <label for="show_all_snippets">Show all</label></p>';
         $snippet_checkbox_options .= '<p>'. form_checkbox('tss[field_show_selected_snippets]', 'y', (isset($settings['field_snippets']['show_selected']) AND $settings['field_snippets']['show_selected'] == 'y') ? TRUE : FALSE, 'id="show_selected_snippets" class="show_selected_snippets"') . ' <label for="show_selected_snippets">Show only specific snippets</label></p>';
-        
+
         if($snippets->num_rows() == 0)
         {
             $snippet_options = '<p>No Snippets exist.</p>';
@@ -499,9 +534,9 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         {
             $snippet_options = form_multiselect('tss[field_snippet_select][]', $this->_create_snippet_options($snippets, true), isset($settings['field_snippets']['snippets']) ? $settings['field_snippets']['snippets'] : array(), 'class="field_snippet_select" size="10" style="display: none;"');
         }
-        
+
         $this->_load_js();
-        
+
         return array(
             array(
                 '<strong>'. lang('template_setting_title') .'</strong>',
@@ -515,7 +550,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
             )
         );
     }
-    
+
     private function _load_js()
     {
         if(!isset($this->cache['js_added']))
@@ -545,7 +580,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                         $(".field_template_select option").attr("selected", false);
                     }
                 }
-                
+
                 function show_all_snippets(on_load){
                     if($(".show_all_snippets").is(":checked")){
                         $(".show_group_snippets, .show_selected_snippets").attr("checked", false).attr("disabled", true);
@@ -563,7 +598,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                         $(".field_snippet_select option").attr("selected", false);
                     }
                 }
-                
+
                 $(".show_all_templates").live("click", function(){
                     show_all_templates(false);
                 });
@@ -573,34 +608,34 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 $(".show_selected_templates").live("click", function(){
                     show_selected_templates(false);
                 });
-                
+
                 $(".show_all_snippets").live("click", function(){
                     show_all_snippets(false);
                 });
                 $(".show_selected_snippets").live("click", function(){
                     show_selected_snippets(false);
                 });
-                
+
                 show_all_templates(true);
                 show_group_templates(true);
                 show_selected_templates(true);
-                
+
                 show_all_snippets(true);
                 show_selected_snippets(true);
             ';
 
             $this->EE->cp->add_to_foot('<!-- BEGIN Template & Snippet Select JS --><script type="text/javascript">$(function(){'. preg_replace("/\s+/", " ", $script) .'});</script><!-- END Template & Snippet Select JS -->');
         }
-        
+
         $this->cache['js_added'] = true;
     }
-    
+
     private function debug($str, $die = false)
     {
         echo '<pre>';
         var_dump($str);
         echo '</pre>';
-        
+
         if($die) die;
     }
 }
