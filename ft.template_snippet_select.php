@@ -3,7 +3,7 @@
 if (! defined('TEMPLATE_SNIPPET_SELECT_VERSION'))
 {
     // get the version from config.php
-    require PATH_THIRD.'template_snippet_select/config.php';
+    require PATH_THIRD.'template_snippet_select/addon.setup.php';
     define('TEMPLATE_SNIPPET_SELECT_VERSION', $config['version']);
     define('TEMPLATE_SNIPPET_SELECT_NAME', $config['name']);
 }
@@ -37,11 +37,11 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         parent::__construct();
 
         // Create cache
-        if (! isset($this->EE->session->cache[__CLASS__]))
+        if (! isset(ee()->session->cache[__CLASS__]))
         {
-            $this->EE->session->cache[__CLASS__] = array();
+            ee()->session->cache[__CLASS__] = array();
         }
-        $this->cache =& $this->EE->session->cache[__CLASS__];
+        $this->cache =& ee()->session->cache[__CLASS__];
     }
 
 	public function accepts_content_type($name)
@@ -58,7 +58,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
 
         foreach ($rows as $row)
         {
-            $this->EE->table->add_row($row[0], $row[1]);
+            ee()->table->add_row($row[0], $row[1]);
         }
     }
 
@@ -99,7 +99,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
 		if (empty($data['tss']))
 		{
-			$settings = $this->EE->input->post('tss');
+			$settings = ee()->input->post('tss');
 		}
 		else
 		{
@@ -185,7 +185,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $return = form_dropdown($this->field_name, $options, $data, 'id="'. $this->field_name .'"');
 
         // If the current user is an Admin, give them a link to edit the templates that appear
-        if($this->EE->session->userdata['group_id'] == 1 AND $group_id)
+        if(ee()->session->userdata['group_id'] == 1 AND $group_id)
         {
             $return .= '<br /><small style="display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);"><a href="'. BASE.AMP.'C=admin_content'.AMP.'M=field_edit'.AMP.'field_id='.$this->field_id.AMP.'group_id='.$group_id .'">Edit Available Templates & Snippets</a></small>';
         }
@@ -216,7 +216,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $return['data'] = form_dropdown($this->cell_name, $options, $data, 'id="'. $this->cell_name .'"');
 
         // If the current user is an Admin, give them a link to edit the templates that appear
-        if($this->EE->session->userdata['group_id'] == 1 AND $group_id)
+        if(ee()->session->userdata['group_id'] == 1 AND $group_id)
         {
             $return['data'] .= '<br /><small style="display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);"><a href="'. BASE.AMP.'C=admin_content'.AMP.'M=field_edit'.AMP.'field_id='.$this->field_id.AMP.'group_id='.$group_id .'">Edit Available Templates & Snippets</a></small>';
         }
@@ -238,9 +238,9 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     function replace_tag($data, $params = '', $tagdata = '')
     {
         // If it's numeric, then we have a Snippet ID, otherwise we have a template
-        if(is_numeric($data) and $data and isset($this->EE->config->_global_vars[$this->_get_snippet($data)]))
+        if(is_numeric($data) and $data and isset(ee()->config->_global_vars[$this->_get_snippet($data)]))
         {
-            return $this->EE->config->_global_vars[$this->_get_snippet($data)];
+            return ee()->config->_global_vars[$this->_get_snippet($data)];
         }
         elseif($data)
         {
@@ -296,7 +296,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     */
     private function _templates_select($data)
     {
-        $this->EE->lang->loadfile('template_snippet_select');
+        ee()->lang->loadfile('template_snippet_select');
         $settings = $this->_get_settings();
 
         $settings = $settings['field_templates'];
@@ -349,7 +349,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     */
     private function _snippets_select($data)
     {
-        $this->EE->lang->loadfile('template_snippet_select');
+        ee()->lang->loadfile('template_snippet_select');
         $settings = $this->_get_settings();
         $settings = $settings['field_snippets'];
         $snippets = $this->_get_snippets();
@@ -411,7 +411,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         if(!isset($this->cache['templates']))
         {
             // Get the current Site ID
-            $site_id = $this->EE->config->item('site_id');
+            $site_id = ee()->config->item('site_id');
 
             $sql = "SELECT tg.group_name, t.template_name, t.template_id
                     FROM exp_template_groups tg, exp_templates t
@@ -419,7 +419,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                     AND tg.site_id = '".$site_id."'
                     ORDER BY tg.group_name, t.template_name";
 
-            $this->cache['templates'] = $this->EE->db->query($sql);
+            $this->cache['templates'] = ee()->db->query($sql);
         }
 
         return $this->cache['templates'];
@@ -429,10 +429,10 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     {
         if(!isset($this->cache['snippet_'. $snippet_id]))
         {
-            $this->EE->db->select('snippet_name');
-            $this->EE->db->where('snippet_id', $snippet_id);
-            $this->EE->db->from('snippets');
-            $query = $this->EE->db->get();
+            ee()->db->select('snippet_name');
+            ee()->db->where('snippet_id', $snippet_id);
+            ee()->db->from('snippets');
+            $query = ee()->db->get();
 
             $this->cache['snippet_'. $snippet_id] = $query->row('snippet_name');
         }
@@ -445,7 +445,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         if(!isset($this->cache['snippets']))
         {
             // Get the current Site ID
-            $site_id = $this->EE->config->item('site_id');
+            $site_id = ee()->config->item('site_id');
 
             $sql = "SELECT *
                     FROM exp_snippets
@@ -453,7 +453,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                     OR site_id = '0'
                     ORDER BY snippet_name";
 
-            $this->cache['snippets'] = $this->EE->db->query($sql);
+            $this->cache['snippets'] = ee()->db->query($sql);
         }
 
         return $this->cache['snippets'];
@@ -485,10 +485,10 @@ class Template_snippet_select_ft extends EE_Fieldtype {
 
         if(!isset($this->cache['group_id'][$field_id]))
         {
-            $this->EE->db->select('group_id');
-            $this->EE->db->where('field_id', $field_id);
-            $this->EE->db->from('channel_fields');
-            $query = $this->EE->db->get();
+            ee()->db->select('group_id');
+            ee()->db->where('field_id', $field_id);
+            ee()->db->from('channel_fields');
+            $query = ee()->db->get();
 
             foreach($query->result_array() as $row)
             {
@@ -501,7 +501,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
 
     private function _get_field_settings($settings)
     {
-        $this->EE->lang->loadfile('template_snippet_select');
+        ee()->lang->loadfile('template_snippet_select');
         $templates = $this->_get_templates();
         $snippets = $this->_get_snippets();
 
@@ -624,7 +624,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                 show_selected_snippets(true);
             ';
 
-            $this->EE->cp->add_to_foot('<!-- BEGIN Template & Snippet Select JS --><script type="text/javascript">$(function(){'. preg_replace("/\s+/", " ", $script) .'});</script><!-- END Template & Snippet Select JS -->');
+            ee()->cp->add_to_foot('<!-- BEGIN Template & Snippet Select JS --><script type="text/javascript">$(function(){'. preg_replace("/\s+/", " ", $script) .'});</script><!-- END Template & Snippet Select JS -->');
         }
 
         $this->cache['js_added'] = true;
