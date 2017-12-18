@@ -563,7 +563,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
 
         return ['field_options_tss' => [
             'label' => 'field_options',
-            'group' => 'tss',
+            'group' => 'template_snippet_select',
             'settings' => $fields
         ]];
     }
