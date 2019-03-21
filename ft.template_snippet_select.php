@@ -1,7 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-if (! defined('TEMPLATE_SNIPPET_SELECT_VERSION')) {
-    require PATH_THIRD.'template_snippet_select/addon.setup.php';
+if (! defined('TEMPLATE_SNIPPET_SELECT_VERSION'))
+{
+    // get the version from config.php
+    require PATH_THIRD.'template_snippet_select/config.php';
     define('TEMPLATE_SNIPPET_SELECT_VERSION', $config['version']);
     define('TEMPLATE_SNIPPET_SELECT_NAME', $config['name']);
 }
@@ -41,10 +43,10 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $this->cache =& ee()->session->cache[__CLASS__];
     }
 
-	public function accepts_content_type($name)
-	{
-		return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
-	}
+    public function accepts_content_type($name)
+    {
+        return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
+    }
 
     /**
      * Normal Fieldtype settings
@@ -81,10 +83,10 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      * @param $data
      * @return array
      */
-	public function grid_display_settings($data)
-	{
-		return $this->_getFieldSettings($data);
-	}
+    public function grid_display_settings($data)
+    {
+        return $this->_getFieldSettings($data);
+    }
 
     /**
      * Save Normal Fieldtype settings
@@ -93,16 +95,16 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      */
     public function save_settings($data)
     {
-		if (empty($data['tss']))
-		{
-			$settings = ee()->input->post('tss');
-		}
-		else
-		{
-			$settings = $data['tss'];
-		}
+        if (empty($data['tss']))
+        {
+            $settings = ee()->input->post('tss');
+        }
+        else
+        {
+            $settings = $data['tss'];
+        }
 
-		return [
+        return [
             'template_snippet_select' => [
                 'field_templates' => [
                     'show_all' => isset($settings['field_show_all_templates']) ? $settings['field_show_all_templates'] : false,
@@ -151,7 +153,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         return $this->save_settings($settings);
     }
 
-	/**
+    /**
      * Save Grid Cell Settings
      */
     public function grid_validate_settings($settings)
@@ -305,7 +307,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
                     !empty($settings['templates']) &&
                     (
                         in_array('--', $settings['templates']) ||
-                        isset($settings['show_selected']) && $settings['show_selected'] == 'y' && in_array($row['template_id'], $settings['templates'])
+                        in_array($row['template_id'], $settings['templates'])
                     )
                 ) {
                     $file = $row['group_name'] .'/'. $row['template_name'];
@@ -396,7 +398,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         foreach ($templateGroups as $group) {
             /** @var \EllisLab\ExpressionEngine\Model\Template\Template $template */
             foreach ($group->Templates as $template) {
-                $options[$template->getId()] = $template->template_name;
+                $options[$template->getId()] = $template->TemplateGroup->group_name .'/'. $template->template_name;
             }
         }
 
