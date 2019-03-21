@@ -1,22 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-if (! defined('TEMPLATE_SNIPPET_SELECT_VERSION'))
-{
-    // get the version from config.php
-    require PATH_THIRD.'template_snippet_select/config.php';
-    define('TEMPLATE_SNIPPET_SELECT_VERSION', $config['version']);
-    define('TEMPLATE_SNIPPET_SELECT_NAME', $config['name']);
-}
-
 /**
- * ExpressionEngine Template Select Fieldtype Class
- * Based on Timothy Kelty's Template Select extension for EE 1.6
- *
  * @package     ExpressionEngine
  * @subpackage  Fieldtypes
  * @category    Template & Snippet Select
  * @author      Brian Litzinger
- * @copyright   Copyright 2010 - Brian Litzinger
+ * @copyright   Copyright 2019 - BoldMinded, LLC
  * @link        http://boldminded.com
  */
 
@@ -26,11 +15,6 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     var $has_array_data = true;
     var $settings_exist = 'y';
     var $settings = [];
-
-    var $info = [
-        'name'      => TEMPLATE_SNIPPET_SELECT_NAME,
-        'version'   => TEMPLATE_SNIPPET_SELECT_VERSION
-    ];
 
     public function __construct()
     {
