@@ -1,11 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
+ * ExpressionEngine Template Select Fieldtype Class
+ * Based on Timothy Kelty's Template Select extension for EE 1.6
+ *
  * @package     ExpressionEngine
  * @subpackage  Fieldtypes
  * @category    Template & Snippet Select
  * @author      Brian Litzinger
- * @copyright   Copyright 2019 - BoldMinded, LLC
+ * @copyright   Copyright 2010 - Brian Litzinger
  * @link        http://boldminded.com
  */
 
@@ -15,6 +18,11 @@ class Template_snippet_select_ft extends EE_Fieldtype {
     var $has_array_data = true;
     var $settings_exist = 'y';
     var $settings = [];
+
+    var $info = [
+        'name'      => TEMPLATE_SNIPPET_SELECT_NAME,
+        'version'   => TEMPLATE_SNIPPET_SELECT_VERSION
+    ];
 
     public function __construct()
     {
@@ -27,10 +35,10 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $this->cache =& ee()->session->cache[__CLASS__];
     }
 
-    public function accepts_content_type($name)
-    {
-        return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
-    }
+	public function accepts_content_type($name)
+	{
+		return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
+	}
 
     /**
      * Normal Fieldtype settings
@@ -67,10 +75,10 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      * @param $data
      * @return array
      */
-    public function grid_display_settings($data)
-    {
-        return $this->_getFieldSettings($data);
-    }
+	public function grid_display_settings($data)
+	{
+		return $this->_getFieldSettings($data);
+	}
 
     /**
      * Save Normal Fieldtype settings
@@ -79,16 +87,16 @@ class Template_snippet_select_ft extends EE_Fieldtype {
      */
     public function save_settings($data)
     {
-        if (empty($data['tss']))
-        {
-            $settings = ee()->input->post('tss');
-        }
-        else
-        {
-            $settings = $data['tss'];
-        }
+		if (empty($data['tss']))
+		{
+			$settings = ee()->input->post('tss');
+		}
+		else
+		{
+			$settings = $data['tss'];
+		}
 
-        return [
+		return [
             'template_snippet_select' => [
                 'field_templates' => [
                     'show_all' => isset($settings['field_show_all_templates']) ? $settings['field_show_all_templates'] : false,
@@ -137,7 +145,7 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         return $this->save_settings($settings);
     }
 
-    /**
+	/**
      * Save Grid Cell Settings
      */
     public function grid_validate_settings($settings)
