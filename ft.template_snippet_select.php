@@ -35,9 +35,16 @@ class Template_snippet_select_ft extends EE_Fieldtype {
         $this->cache =& ee()->session->cache[__CLASS__];
     }
 
-    public function accepts_content_type($name)
+    public function accepts_content_type($name = ''): bool
     {
-        return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
+        $acceptedTypes = [
+            'blocks/1',
+            'channel',
+            'fluid_field',
+            'grid',
+        ];
+
+        return in_array($name, $acceptedTypes);
     }
 
     /**
